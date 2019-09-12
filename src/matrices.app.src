@@ -1,9 +1,8 @@
 {application,matrices,
- [{applications,[kazoo,kazoo_amqp,kazoo_apps,kazoo_call,
-                 kazoo_stdlib,kernel,lager,stdlib]},
-  {description,"Matrices - A multi-tenant Matrix.org homeserver"},
-  {env,[{is_kazoo_app,true}]},
-  {mod,{skel_app,[]}},
-  {modules,[]},
-  {registered,[matrices_sup,matrices_listener]},
-  {vsn,"0.0.1"}]}.
+             [{applications,[kazoo,kazoo_amqp,kernel,lager,stdlib]},
+              {description,"Matrices - A multi-tenant Matrix.org homeserver"},
+              {env,[{is_kazoo_app,true}]},
+              {mod,{skel_app,[]}},
+              {modules,[]},
+              {registered,[matrices_sup,matrices_listener]},
+              {vsn,"0.0.1"}]}.
