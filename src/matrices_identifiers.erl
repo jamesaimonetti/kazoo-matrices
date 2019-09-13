@@ -38,11 +38,12 @@
                       }.
 
 -export_type([matrix_id/0
+             ,matrix_to/0
              ,sigil/0
              ,domain/0
              ]).
 
--spec encode(matrix_id()) -> kz_term:ne_binary().
+-spec encode(matrix_id() | matrix_to()) -> kz_term:ne_binary().
 encode(#{sigil := Sigil
         ,localpart := LocalPart
         ,domain := Domain
@@ -51,7 +52,24 @@ encode(#{sigil := Sigil
                      ,LocalPart
                      ,":"
                      ,encode_domain(Domain)
+                     ]);
+encode(#{matrix_id := ID
+        ,extra_parameter := ExtraParameter
+        ,additional_arguments := AdditionalArguments
+        }) ->
+    iolist_to_binary([?MATRIX_TO_PREFIX
+                     ,kz_http_util:urlencode(encode(ID))
+                     ,encode_extra_parameter(ExtraParameter)
+                     ,encode_additional_argumetns(AdditionalArguments)
                      ]).
+
+encode_extra_parameter('undefined') -> <<>>;
+encode_extra_parameter(ExtraParameter) ->
+    ["/", kz_http_util:urlencode(encode(ExtraParameter))].
+
+encode_additional_argumetns([]) -> <<>>;
+encode_additional_argumetns(AdditionalArguments) ->
+    ["?", kz_http_util:props_to_querystring(AdditionalArguments)].
 
 -spec decode(kz_term:ne_binary()) -> matrix_id() | matrix_to().
 decode(<<?MATRIX_TO_PREFIX, _/binary>>=URI) ->
@@ -64,7 +82,6 @@ decode(<<SigilChar:1/binary, ID/binary>>) ->
 
 -spec decode_matrix_to(kz_term:ne_binary() | split_uri()) -> matrix_to().
 decode_matrix_to(<<?MATRIX_TO_PREFIX, Path/binary>>) ->
-    io:format("split: ~p~n", [Path]),
     decode_matrix_to(kz_http_util:urlsplit(Path));
 decode_matrix_to({<<>>=_Scheme
                  ,<<>>=_Host

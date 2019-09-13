@@ -149,7 +149,7 @@ matrix_to_uris() ->
                }
              }
             ,{"room"
-             ,<<?MATRIX_TO_PREFIX, "!somewhere%3Aexample.org">>
+             ,<<?MATRIX_TO_PREFIX, "%21somewhere%3Aexample.org">>
              ,#{matrix_id => #{sigil => 'room'
                               ,localpart => <<"somewhere">>
                               ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
@@ -159,7 +159,7 @@ matrix_to_uris() ->
                }
              }
             ,{"permalink by room"
-             ,<<?MATRIX_TO_PREFIX, "!somewhere%3Aexample.org/%24event%3Aexample.org">>
+             ,<<?MATRIX_TO_PREFIX, "%21somewhere%3Aexample.org/%24event%3Aexample.org">>
              ,#{matrix_id => #{sigil => 'room'
                               ,localpart => <<"somewhere">>
                               ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
@@ -172,7 +172,7 @@ matrix_to_uris() ->
                }
              }
             ,{"permalink by room alias"
-             ,<<?MATRIX_TO_PREFIX, "%23somewhere:example.org/%24event%3Aexample.org">>
+             ,<<?MATRIX_TO_PREFIX, "%23somewhere%3Aexample.org/%24event%3Aexample.org">>
              ,#{matrix_id => #{sigil => 'room_alias'
                               ,localpart => <<"somewhere">>
                               ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
@@ -205,7 +205,7 @@ matrix_to_uris() ->
                }
              }
             ,{"routable room"
-             ,<<?MATRIX_TO_PREFIX, "!somewhere%3Aexample.org?via=example.org&via=alt.example.org">>
+             ,<<?MATRIX_TO_PREFIX, "%21somewhere%3Aexample.org?via=example.org&via=alt.example.org">>
              ,#{matrix_id => #{sigil => 'room'
                               ,localpart => <<"somewhere">>
                               ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
@@ -218,7 +218,7 @@ matrix_to_uris() ->
              }
             ],
 
-    [{"Decoding matrix.to URI for " ++ Label, ?_assertEqual(Decoded, matrices_identifiers:decode(Encoded))}
+    [{"Decoding matrix.to URI for " ++ Label, encode_decode(Encoded, Decoded)}
      || {Label, Encoded, Decoded} <- Tests
     ].
 
