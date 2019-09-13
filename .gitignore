@@ -1,3 +1,4 @@
 /.deps.mk
 /.test.deps
 ebin/
+test/matrices.app
