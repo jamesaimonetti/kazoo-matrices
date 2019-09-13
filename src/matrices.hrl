@@ -16,5 +16,8 @@
 
 -define(DEFAULT_HOMESERVER_PORT, 8448).
 
+%% https://matrix.org/docs/spec/appendices#matrix-to-navigationf
+-define(MATRIX_TO_PREFIX, "https://matrix.to/#/").
+
 -define(MATRICES_HRL, 'true').
 -endif.

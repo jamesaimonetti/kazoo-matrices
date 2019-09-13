@@ -6,6 +6,7 @@
         ,decode_event_id/1
         ,decode_group_id/1
         ,decode_room_alias/1
+        ,decode_matrix_to/1
         ]).
 
 -export([encode/1]).
@@ -31,6 +32,11 @@
                       ,domain => domain()
                       }.
 
+-type matrix_to() :: #{matrix_id => matrix_id()
+                      ,extra_parameter => kz_term:api_ne_binary()
+                      ,additional_arguments => kz_term:api_ne_binary()
+                      }.
+
 -export_type([matrix_id/0
              ,sigil/0
              ,domain/0
@@ -47,10 +53,37 @@ encode(#{sigil := Sigil
                      ,encode_domain(Domain)
                      ]).
 
--spec decode(kz_term:ne_binary()) -> matrix_id().
+-spec decode(kz_term:ne_binary()) -> matrix_id() | matrix_to().
+decode(<<?MATRIX_TO_PREFIX, _/binary>>=URI) ->
+    decode_matrix_to(URI);
 decode(<<SigilChar:1/binary, ID/binary>>) ->
     Sigil = char_to_sigil(SigilChar),
     decode_id(Sigil, ID).
+
+-type split_uri() :: {binary(), binary(), binary(), binary(), binary()}.
+
+-spec decode_matrix_to(kz_term:ne_binary() | split_uri()) -> matrix_to().
+decode_matrix_to(<<?MATRIX_TO_PREFIX, Path/binary>>) ->
+    io:format("split: ~p~n", [Path]),
+    decode_matrix_to(kz_http_util:urlsplit(Path));
+decode_matrix_to({<<>>=_Scheme
+                 ,<<>>=_Host
+                 ,<<Path/binary>>
+                 ,<<QueryString/binary>>
+                 ,<<>>=_Fragment
+                 }) ->
+    case binary:split(Path, <<"/">>) of
+        [ID] ->
+            #{matrix_id => decode(kz_http_util:urldecode(ID))
+             ,extra_parameter => 'undefined'
+             ,additional_arguments => kz_http_util:parse_query_string(QueryString)
+             };
+        [ID, Extra] ->
+            #{matrix_id => decode(kz_http_util:urldecode(ID))
+             ,extra_parameter => decode(kz_http_util:urldecode(Extra))
+             ,additional_arguments => kz_http_util:parse_query_string(QueryString)
+             }
+    end.
 
 -spec decode_id(sigil(), kz_term:ne_binary()) -> matrix_id().
 decode_id('user', ID) ->       decode_user_id(ID);

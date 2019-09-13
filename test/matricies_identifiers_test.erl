@@ -9,6 +9,7 @@ matrix_ids_test_() ->
     ,event_ids()
     ,group_ids()
     ,room_aliases()
+    ,matrix_to_uris()
     ].
 
 user_ids() ->
@@ -135,6 +136,91 @@ room_aliases() ->
              }
             ],
     {"room aliases processing", build_tests(Tests)}.
+
+matrix_to_uris() ->
+    Tests = [{"room alias"
+             ,<<?MATRIX_TO_PREFIX, "%23somewhere%3Aexample.org">>
+             ,#{matrix_id => #{sigil => 'room_alias'
+                              ,localpart => <<"somewhere">>
+                              ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
+                              }
+               ,extra_parameter => 'undefined'
+               ,additional_arguments => []
+               }
+             }
+            ,{"room"
+             ,<<?MATRIX_TO_PREFIX, "!somewhere%3Aexample.org">>
+             ,#{matrix_id => #{sigil => 'room'
+                              ,localpart => <<"somewhere">>
+                              ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
+                              }
+               ,extra_parameter => 'undefined'
+               ,additional_arguments => []
+               }
+             }
+            ,{"permalink by room"
+             ,<<?MATRIX_TO_PREFIX, "!somewhere%3Aexample.org/%24event%3Aexample.org">>
+             ,#{matrix_id => #{sigil => 'room'
+                              ,localpart => <<"somewhere">>
+                              ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
+                              }
+               ,extra_parameter => #{sigil => 'event'
+                                    ,localpart => <<"event">>
+                                    ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
+                                    }
+               ,additional_arguments => []
+               }
+             }
+            ,{"permalink by room alias"
+             ,<<?MATRIX_TO_PREFIX, "%23somewhere:example.org/%24event%3Aexample.org">>
+             ,#{matrix_id => #{sigil => 'room_alias'
+                              ,localpart => <<"somewhere">>
+                              ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
+                              }
+               ,extra_parameter => #{sigil => 'event'
+                                    ,localpart => <<"event">>
+                                    ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
+                                    }
+               ,additional_arguments => []
+               }
+             }
+            ,{"user"
+             ,<<?MATRIX_TO_PREFIX, "%40alice%3Aexample.org">>
+             ,#{matrix_id => #{sigil => 'user'
+                              ,localpart => <<"alice">>
+                              ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
+                              }
+               ,extra_parameter => 'undefined'
+               ,additional_arguments => []
+               }
+             }
+            ,{"group"
+             ,<<?MATRIX_TO_PREFIX, "%2Bexample%3Aexample.org">>
+             ,#{matrix_id => #{sigil => 'group'
+                              ,localpart => <<"example">>
+                              ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
+                              }
+               ,extra_parameter => 'undefined'
+               ,additional_arguments => []
+               }
+             }
+            ,{"routable room"
+             ,<<?MATRIX_TO_PREFIX, "!somewhere%3Aexample.org?via=example.org&via=alt.example.org">>
+             ,#{matrix_id => #{sigil => 'room'
+                              ,localpart => <<"somewhere">>
+                              ,domain => {'fqdn', <<"example.org">>, ?DEFAULT_HOMESERVER_PORT}
+                              }
+               ,extra_parameter => 'undefined'
+               ,additional_arguments => [{<<"via">>,<<"example.org">>}
+                                        ,{<<"via">>,<<"alt.example.org">>}
+                                        ]
+               }
+             }
+            ],
+
+    [{"Decoding matrix.to URI for " ++ Label, ?_assertEqual(Decoded, matrices_identifiers:decode(Encoded))}
+     || {Label, Encoded, Decoded} <- Tests
+    ].
 
 build_tests(Tests) ->
     [encode_decode(Encoded, Decoded) || {Encoded, Decoded} <- Tests].
