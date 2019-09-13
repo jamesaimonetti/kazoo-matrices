@@ -34,7 +34,7 @@
 
 -type matrix_to() :: #{matrix_id => matrix_id()
                       ,extra_parameter => kz_term:api_ne_binary()
-                      ,additional_arguments => kz_term:api_ne_binary()
+                      ,additional_arguments => kz_term:proplist()
                       }.
 
 -export_type([matrix_id/0
